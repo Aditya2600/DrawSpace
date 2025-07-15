@@ -1,7 +1,7 @@
-import express from 'express';
-import jwt from 'jsonwebtoken';
+import express from "express";
+import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '@repo/backend-common/config';
-import { middleware } from './middleware';
+import { middleware } from "./middleware";
 import { CreateRoomSchema, CreateUserSchema, SignInSchema } from "@repo/common/types"; 
 import { prismaClient } from "@repo/db/client";
 
@@ -14,7 +14,7 @@ app.post("/signup", async (req, res) => {
     const parsedData = CreateUserSchema.safeParse(req.body);
 
     if (!parsedData.success) {
-        parsedData.log(parsedData.error);
+        console.log(parsedData.error);
         res.json({
             message: "Incorrect inputs"
         });
@@ -81,7 +81,24 @@ app.post("/room", middleware, async (req, res) => {
 
         res.json({ roomId: room.id });
     } catch (e) {
-        res.status(400).json({ message: "Room already exists or error creating" });
+        res.status(400).json({
+            message: "Room already exists or error creating"
+        });
     }
 });
+app.get("/chats/:roomId", async (req, res) => {
+    const roomId = Number(req.params.roomId);
+    const message = await prismaClient.chat.findMany({
+        where: {
+            roomId: roomId
+        },
+        orderBy: {
+            id: "desc"
+        },
+        take: 50
+    });
+    res.json({
+        messages
+    })
+})
 app.listen(3001);

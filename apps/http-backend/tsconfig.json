@@ -1,13 +1,7 @@
 {
-  "extends": "@repo/typescript-config/base.json",
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@repo/*": ["../../packages/*"]
+    "extends": "@repo/typescript-config/base.json",
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./dist"
     }
-  },
-  "include": ["src", "../../types"]  // ✅ include custom types folder
 }
