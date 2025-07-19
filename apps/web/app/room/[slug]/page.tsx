@@ -1,6 +1,7 @@
 // /app/room/[slug]/page.tsx
 import axios from "axios";
 import { BACKEND_URL } from "../../config";
+import { ChatRoom } from "../../../components/ChatRoom";
 
 
 async function getRoomId(slug: string) {

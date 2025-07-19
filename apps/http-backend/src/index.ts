@@ -25,7 +25,7 @@
 //         const user = await prismaClient.user.create({
 //             data: {
 //                 email: parsedData.data?.username,  // 👈 assuming username == email
-//                 password: parsedData.data.password,  // TODO: Hash this later
+//                 password: parsedData.data.password,   TODO: Hash this later
 //                 name: parsedData.data.name
 //             }
 //         });
@@ -122,9 +122,11 @@ import { JWT_SECRET } from '@repo/backend-common/config';
 import { middleware } from "./middleware";
 import { CreateRoomSchema, CreateUserSchema, SignInSchema } from "@repo/common/types";
 import { prismaClient } from "@repo/db/client";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+app.use(cors())
 
 // Rate Limiter - 100 requests per 15 minutes
 const limiter = rateLimit({
@@ -212,8 +214,9 @@ app.get("/chats/:roomId", middleware, async (req, res) => {
         });
         res.json({ messages });
     }
-    catch(e){
-        res.json({ messages: []
+    catch (e) {
+        res.json({
+            messages: []
         });
     }
 });
