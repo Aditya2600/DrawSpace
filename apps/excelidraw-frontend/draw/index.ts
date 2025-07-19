@@ -48,14 +48,19 @@ export async function initDraw(
 
     canvas.addEventListener("mousedown", (e) => {
         clicked = true;
-        startX = e.clientX;
-        startY = e.clientY;
+        const rect = canvas.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
     });
 
     canvas.addEventListener("mouseup", (e) => {
         clicked = false;
-        const width = e.clientX - startX;
-        const height = e.clientY - startY;
+        const rect = canvas.getBoundingClientRect();
+        const endX = e.clientX - rect.left;
+        const endY = e.clientY - rect.top;
+
+        const width = endX - startX;
+        const height = endY - startY;
         const shape: Shape = {
             type: "rect",
             x: startX,
@@ -75,8 +80,13 @@ export async function initDraw(
 
     canvas.addEventListener("mousemove", (e) => {
         if (clicked) {
-            const width = e.clientX - startX;
-            const height = e.clientY - startY;
+            const rect = canvas.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            const width = currentX - startX;
+            const height = currentY - startY;
+            
             clearCanvas(existingShapes, canvas, ctx);;
             ctx.strokeStyle = "rgba(255, 255, 255)";
             ctx.strokeRect(startX, startY, width, height);

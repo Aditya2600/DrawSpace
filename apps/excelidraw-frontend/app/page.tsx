@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from "next/link";
 import { 
   PenTool, 
   Users, 
@@ -57,8 +58,18 @@ function App() {
               DrawSpace is a free, open-source drawing tool that lets you create beautiful diagrams, 
               sketches, and wireframes with ease. No account required, works offline, and your data stays private.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/signin" className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center space-x-2">
+                Sign In <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link href="/signup" className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold flex items-center justify-center space-x-2">
+                Signup
+              </Link>
+            </div>
+          </div>
+            
+            {/* <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center space-x-2">
                 <span>Start Drawing</span>
                 <ArrowRight className="w-5 h-5" />
@@ -68,7 +79,7 @@ function App() {
                 <span>View on GitHub</span>
               </button>
             </div>
-          </div>
+          </div> */}
           
           {/* Hero Image Placeholder */}
           <div className="mt-16 relative">
