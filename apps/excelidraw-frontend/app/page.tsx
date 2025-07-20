@@ -11,7 +11,7 @@ import {
   Star,
   Github,
   Twitter
-} from 'lucide-react';
+} from 'lucide-react'
 
 function App() {
   return (
