@@ -195,7 +195,20 @@ app.post("/room", middleware, async (req, res) => {
         res.status(409).json({ message: "Room already exists" });
     }
 });
-
+// Get list of rooms
+app.get("/rooms", middleware, async (req, res) => {
+    try {
+        const rooms = await prismaClient.room.findMany({
+            select: {
+                id: true,
+                slug: true
+            }
+        });
+        res.json({ rooms });
+    } catch {
+        res.status(500).json({ message: "Failed to fetch rooms" });
+    }
+});
 // Protected Chats Endpoint
 app.get("/chats/:roomId", middleware, async (req, res) => {
     try {

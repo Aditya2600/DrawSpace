@@ -49,14 +49,13 @@ function App() {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Create Beautiful
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 block">
+              <span className="pb-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 block">
                 Diagrams & Drawings
               </span>
             </h1>
             
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              DrawSpace is a free, open-source drawing tool that lets you create beautiful diagrams, 
-              sketches, and wireframes with ease. No account required, works offline, and your data stays private.
+              The intuitive drawing tool that brings your ideas to life with hand-drawn style and collaborative features.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

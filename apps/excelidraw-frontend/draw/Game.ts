@@ -1,3 +1,4 @@
+import { Tool } from "@/components/Canvas";
 import { getExistingShapes } from "./http";
 
 type Shape =
@@ -35,7 +36,7 @@ export class Game {
 
     constructor(canvas: HTMLCanvasElement, roomId: string, socket: WebSocket) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
+        this.ctx = canvas.getContext("2d")!;
         this.existingShapes = [];
         this.roomId = roomId;
         this.socket = socket;
