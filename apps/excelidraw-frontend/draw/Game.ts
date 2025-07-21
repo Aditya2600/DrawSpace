@@ -1,6 +1,6 @@
 import type { Tool } from "@/components/Canvas";
 import { Drawing } from "@/components/RoomCanvas";
-import { HTTP_BACKEND } from "@/config";
+
 
 type Shape =
     | {

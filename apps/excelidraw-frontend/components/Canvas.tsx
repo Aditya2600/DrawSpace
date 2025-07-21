@@ -32,7 +32,7 @@ export function Canvas({ roomId, socket, initialDrawings, onGameReady }: CanvasP
                 g.destroy();
             }
         }
-    }, [canvasRef, roomId, socket]);
+    }, [canvasRef, roomId, socket, initialDrawings]);
 
     useEffect(() => {
     const resize = () => {
