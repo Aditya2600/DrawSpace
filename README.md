@@ -52,12 +52,13 @@ backend-common/          # Shared configs (JWT secret, URLs, etc.)
 ```bash
 git clone https://github.com/Aditya2600/DrawSpace.git
 cd drawspace
-
-2. Install dependencies (Turbo repo)
-
+```
+### 2. Install dependencies (Turbo repo)
+```bash
 pnpm install
+```
 
-3. Set up environment variables
+### 3. Set up environment variables
 
 Create a .env file in each app/package as needed:
 
@@ -71,13 +72,14 @@ For /apps/excelidraw-frontend/.env:
 NEXT_PUBLIC_HTTP_BACKEND=http://localhost:3001
 NEXT_PUBLIC_WS_URL=ws://localhost:8080
 
-4. Generate Prisma Client
-
+### 4. Generate Prisma Client
+```bash
 cd packages/db
 pnpm prisma generate
 pnpm prisma migrate dev --name init
+```
 
-5. Run all apps
+### 5. Run all apps
 
 Start all dev servers using Turbo:
 
@@ -86,60 +88,19 @@ pnpm dev
 Or run them individually:
 
 # WebSocket server
+```bash
 cd apps/websocket-backend && pnpm dev
+```
 
 # HTTP backend
+```bash
 cd apps/http-backend && pnpm dev
+```
 
 # Frontend
+```bash
 cd apps/excelidraw-frontend && pnpm dev
-
-
-⸻
-
-🧪 How It Works (Real-Time Drawing Flow)
-
-🖌️ Drawing Flow
-	•	User selects a tool and starts drawing on the canvas.
-	•	The shape is broadcasted over WebSocket (type: "draw") to all clients in the same room.
-	•	The shape is persisted in PostgreSQL (drawing table).
-	•	Other users immediately receive and render the shape.
-	•	New users joining later fetch the shapes using GET /rooms/:roomId/drawings.
-
-🧽 Erasing Flow
-	•	Eraser checks overlap with existing shapes and soft-deletes (deletedAt is set).
-	•	type: "erase" is broadcasted with erasedShapeIds.
-	•	Other clients remove the shapes visually.
-	•	Soft-deleted shapes are excluded when reloading from DB.
-
-⸻
-
-📦 API Overview
-
-HTTP Backend (/apps/http-backend)
-
-Route	Description
-POST /auth/signup	Signup new user
-POST /auth/signin	Login, returns JWT
-POST /room/create	Create new room
-GET /room/:slug	Get room ID by slug
-GET /rooms/:id/drawings	Get all active drawings
-
-WebSocket Events (/apps/websocket-backend)
-
-Type	Payload	Description
-join_room	{ roomId }	Join a room
-draw	{ roomId, shape }	Broadcast + persist shape
-erase	{ roomId, erasedShapeIds: number[] }	Soft delete shapes
-chat	{ roomId, message }	Persist + broadcast chat
-
-
-⸻
-
-🛡️ Security
-	•	JWT token verification for every WebSocket connection.
-	•	Auth-protected room creation and data endpoints.
-	•	Rate limiting and error handling planned for production hardening.
+```
 
 ⸻
 
