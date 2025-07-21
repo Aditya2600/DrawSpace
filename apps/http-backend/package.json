@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "prisma": "pnpm --filter @repo/db exec prisma generate",
+    "prisma": "pnpm --filter @repo/db exec prisma generate --schema=./prisma/schema.prisma",
     "build": "tsc -b",
     "start": "node ./dist/index.js",
     "dev": "npm run build && npm run start"
