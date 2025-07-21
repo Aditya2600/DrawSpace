@@ -50,7 +50,7 @@ backend-common/          # Shared configs (JWT secret, URLs, etc.)
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/drawspace.git
+git clone https://github.com/Aditya2600/DrawSpace.git
 cd drawspace
 
 2. Install dependencies (Turbo repo)
@@ -140,13 +140,6 @@ chat	{ roomId, message }	Persist + broadcast chat
 	•	JWT token verification for every WebSocket connection.
 	•	Auth-protected room creation and data endpoints.
 	•	Rate limiting and error handling planned for production hardening.
-
-⸻
-
-
-🤝 Contributors
-	•	Aditya Meshram
-	•	ChatGPT (assistant support on real-time sync & persistence design)
 
 ⸻
 
