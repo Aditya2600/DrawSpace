@@ -35,3 +35,12 @@ room          Room         @relation(fields: [roomId], references: [id])
 user          User         @relation(fields: [userId], references: [id])
 }
 
+model Drawing {
+  id       Int      @id @default(autoincrement())
+  roomId   Int
+  userId   String
+  type     String   // circle, rect, pencil
+  data     Json     // coordinates, dimensions, color, etc.
+  createdAt DateTime @default(now())
+  deletedAt  DateTime?
+}

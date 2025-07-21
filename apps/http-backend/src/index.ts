@@ -117,5 +117,34 @@ app.get("/chats/:roomId", middleware, async (req, res) => {
         });
     }
 });
+// Get room by slug (public or protected, your choice)
+// Without auth middleware (public):
+app.get("/room/:slug", async (req, res) => {
+    try {
+        const slug = req.params.slug;
+
+        const room = await prismaClient.room.findFirst({
+            where: { slug },
+        });
+
+        if (!room) {
+            return res.status(404).json({ message: "Room not found" });
+        }
+
+        return res.json({ room });
+    } catch (e) {
+        console.error("Failed to fetch room by slug:", e);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+app.get("/rooms/:roomId/drawings", async (req, res) => {
+    const roomId = Number(req.params.roomId);
+    const drawings = await prismaClient.drawing.findMany({
+        where: { roomId , deletedAt: null},
+    });
+    res.json(drawings);
+});
+
 
 app.listen(3001, () => console.log("HTTP server running on port 3001"));

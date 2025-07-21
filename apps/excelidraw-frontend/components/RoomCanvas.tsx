@@ -1,31 +1,68 @@
 "use client";
 
-import { WS_URL } from "@/config";
+import { WS_URL, HTTP_BACKEND } from "@/config";
 import { useEffect, useState } from "react";
 import { Canvas } from "./Canvas";
+import { Game } from "@/draw/Game";
+
+export type Drawing = {
+    id: number;
+    type: "rect" | "circle" | "pencil" | "freehand";
+    data: any;
+};
 
 export function RoomCanvas({ roomId }: { roomId: string }) {
-
     const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [game, setGame] = useState<Game | null>(null);
+    const [initialDrawings, setInitialDrawings] = useState<Drawing[]>([]);
 
     useEffect(() => {
-        const ws = new WebSocket(`${WS_URL}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMDRlNjYzMy0xZDY0LTQ3MDUtYjFiYS01MGUzOTgzM2Y0MTQiLCJpYXQiOjE3NTI4NTUwNTcsImV4cCI6MTc1MzQ1OTg1N30.FbQCXkmFbc2vzlsurJ7iM3OURlLugwJp0JqBX4D6jJc`)
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("No token found. Please login first.");
+            return;
+        }
+
+        const ws = new WebSocket(`${WS_URL}?token=${token}`);
 
         ws.onopen = () => {
             setSocket(ws);
             ws.send(JSON.stringify({
                 type: "join_room",
-                roomId: roomId
-            }))
-        }
-    }, [])
+                roomId
+            }));
+        };
 
-    if (!socket) {
-        return <div>
-            Connecting to server....
-        </div>
-    }
-    return <div>
-        <Canvas roomId={roomId} socket={socket} />
-    </div>
+        ws.onerror = (err) => {
+            console.error("WebSocket error:", err);
+        };
+
+        return () => ws.close();
+    }, [roomId]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        async function loadDrawings() {
+            try {
+                const res = await fetch(`${HTTP_BACKEND}/rooms/${roomId}/drawings`);
+                const drawings = await res.json();
+                setInitialDrawings(drawings);
+            } catch (err) {
+                console.error("Failed to load drawings:", err);
+            }
+        }
+        loadDrawings();
+    }, [socket, roomId]);
+
+    if (!socket) return <div>Connecting to server...</div>;
+
+    return (
+        <Canvas
+            roomId={roomId}
+            socket={socket}
+            initialDrawings={initialDrawings}
+            onGameReady={(g: Game) => setGame(g)}
+        />
+    );
 }
