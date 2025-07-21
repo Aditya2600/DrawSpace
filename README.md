@@ -87,17 +87,17 @@ pnpm dev
 
 Or run them individually:
 
-# WebSocket server
+## WebSocket server
 ```bash
 cd apps/websocket-backend && pnpm dev
 ```
 
-# HTTP backend
+## HTTP backend
 ```bash
 cd apps/http-backend && pnpm dev
 ```
 
-# Frontend
+## Frontend
 ```bash
 cd apps/excelidraw-frontend && pnpm dev
 ```
