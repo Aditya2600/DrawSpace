@@ -1,135 +1,155 @@
-# Turborepo starter
+# 🎨 DrawSpace — Real-time Collaborative Drawing App
 
-This Turborepo starter is maintained by the Turborepo core team.
+DrawSpace is a full-stack collaborative whiteboard application that supports real-time drawing, erasing, and chatting inside authenticated drawing rooms. Users can draw using various tools like rectangle, circle, pencil, and freehand; erase with soft delete; and have their data persist even after refreshing or rejoining the room.
 
-## Using this example
+---
 
-Run the following command:
+## ✨ Features
 
-```sh
-npx create-turbo@latest
-```
+- ✅ Real-time drawing with WebSockets
+- ✅ Tools: Rectangle, Circle, Pencil, Freehand
+- ✅ Eraser with soft-delete (persisted across sessions)
+- ✅ Chat inside drawing rooms
+- ✅ JWT-based user authentication
+- ✅ Persistent storage using PostgreSQL + Prisma ORM
+- ✅ Turbo monorepo with shared packages
+- ✅ Modular architecture with scalable components
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 🧱 Tech Stack
 
-### Apps and Packages
+| Layer        | Tech                                        |
+|-------------|---------------------------------------------|
+| Frontend     | Next.js (App Router), Tailwind CSS          |
+| Backend (API) | Express.js (Node.js)                        |
+| Real-time    | `ws` WebSocket server                       |
+| Database     | PostgreSQL + Prisma ORM                     |
+| Auth         | JWT (JSON Web Tokens)                       |
+| Monorepo     | Turborepo + PNPM workspaces                 |
+| UI Components| `@repo/ui` shared package                   |
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## 📁 Monorepo Structure
 
-### Utilities
+apps/
+excelidraw-frontend/     # Next.js frontend
+http-backend/            # Express backend (auth & REST)
+websocket-backend/       # WebSocket server (real-time draw/chat)
 
-This Turborepo has some additional tools already setup for you:
+packages/
+db/                      # Prisma schema & client
+ui/                      # Reusable UI components
+backend-common/          # Shared configs (JWT secret, URLs, etc.)
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+---
 
-### Build
+## 🚀 Getting Started
 
-To build all apps and packages, run the following command:
+### 1. Clone the repository
 
-```
-cd my-turborepo
+```bash
+git clone https://github.com/your-username/drawspace.git
+cd drawspace
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+2. Install dependencies (Turbo repo)
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+pnpm install
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+3. Set up environment variables
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+Create a .env file in each app/package as needed:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+For /packages/db/.env and others:
 
-### Develop
+DATABASE_URL=postgresql://your-user:your-pass@localhost:5432/drawspace
+JWT_SECRET=your_super_secret_jwt
 
-To develop all apps and packages, run the following command:
+For /apps/excelidraw-frontend/.env:
 
-```
-cd my-turborepo
+NEXT_PUBLIC_HTTP_BACKEND=http://localhost:3001
+NEXT_PUBLIC_WS_URL=ws://localhost:8080
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+4. Generate Prisma Client
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+cd packages/db
+pnpm prisma generate
+pnpm prisma migrate dev --name init
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+5. Run all apps
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+Start all dev servers using Turbo:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+pnpm dev
 
-### Remote Caching
+Or run them individually:
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+# WebSocket server
+cd apps/websocket-backend && pnpm dev
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+# HTTP backend
+cd apps/http-backend && pnpm dev
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+# Frontend
+cd apps/excelidraw-frontend && pnpm dev
 
-```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+⸻
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+🧪 How It Works (Real-Time Drawing Flow)
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+🖌️ Drawing Flow
+	•	User selects a tool and starts drawing on the canvas.
+	•	The shape is broadcasted over WebSocket (type: "draw") to all clients in the same room.
+	•	The shape is persisted in PostgreSQL (drawing table).
+	•	Other users immediately receive and render the shape.
+	•	New users joining later fetch the shapes using GET /rooms/:roomId/drawings.
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+🧽 Erasing Flow
+	•	Eraser checks overlap with existing shapes and soft-deletes (deletedAt is set).
+	•	type: "erase" is broadcasted with erasedShapeIds.
+	•	Other clients remove the shapes visually.
+	•	Soft-deleted shapes are excluded when reloading from DB.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+⸻
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+📦 API Overview
 
-## Useful Links
+HTTP Backend (/apps/http-backend)
 
-Learn more about the power of Turborepo:
+Route	Description
+POST /auth/signup	Signup new user
+POST /auth/signin	Login, returns JWT
+POST /room/create	Create new room
+GET /room/:slug	Get room ID by slug
+GET /rooms/:id/drawings	Get all active drawings
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+WebSocket Events (/apps/websocket-backend)
+
+Type	Payload	Description
+join_room	{ roomId }	Join a room
+draw	{ roomId, shape }	Broadcast + persist shape
+erase	{ roomId, erasedShapeIds: number[] }	Soft delete shapes
+chat	{ roomId, message }	Persist + broadcast chat
+
+
+⸻
+
+🛡️ Security
+	•	JWT token verification for every WebSocket connection.
+	•	Auth-protected room creation and data endpoints.
+	•	Rate limiting and error handling planned for production hardening.
+
+⸻
+
+
+🤝 Contributors
+	•	Aditya Meshram
+	•	ChatGPT (assistant support on real-time sync & persistence design)
+
+⸻
+
+🧾 License
+
+MIT License © 2025 
