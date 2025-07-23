@@ -10,7 +10,7 @@ on:
       - 'packages/**'
 
 env:
-  IMAGE_NAME: yourdockerhubusername/draw-app-frontend
+  IMAGE_NAME: aditya1300/draw-app-frontend
   CONTAINER_NAME: draw-app-frontend
   VM_SSH_USER: ubuntu
   VM_SSH_HOST: your.vm.ip.address
