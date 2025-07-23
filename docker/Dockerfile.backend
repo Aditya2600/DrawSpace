@@ -1,0 +1,51 @@
+# ✅ Step 1: Base build stage using lightweight Node Alpine image
+FROM node:22-alpine AS base
+
+WORKDIR /app
+
+# ✅ Step 2: Copy core workspace config + install tool
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+
+# ✅ Step 3: Copy only package.json files for install scope
+COPY packages/db/package.json ./packages/db/package.json
+COPY apps/http-backend/package.json ./apps/http-backend/package.json
+COPY packages/backend-common/package.json ./packages/backend-common/package.json
+COPY packages/typescript-config/package.json ./packages/typescript-config/package.json
+
+# ✅ Step 4: Install monorepo dependencies
+RUN pnpm install --frozen-lockfile
+
+# ✅ Step 5: Copy actual source code into image
+COPY packages/db ./packages/db
+COPY apps/http-backend ./apps/http-backend
+COPY packages/backend-common ./packages/backend-common
+COPY packages/typescript-config ./packages/typescript-config
+
+# ✅ Step 6: Provide Prisma DATABASE_URL during build
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+# ✅ Step 7: Generate Prisma client
+RUN pnpm --filter @repo/db exec prisma generate
+
+# ✅ Step 8: Build the backend (TypeScript)
+RUN pnpm --filter http-backend run build
+
+# ✅ Step 9: Runtime stage (slim & clean)
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+# ✅ Step 10: Copy built output and runtime dependencies only
+COPY --from=base /app/apps/http-backend/dist ./dist
+COPY --from=base /app/apps/http-backend/package.json ./
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/packages/db/prisma ./prisma  
+
+# ✅ Step 11: Set runtime environment
+ENV NODE_ENV=production
+ENV PORT=3001
+EXPOSE 3001
+
+CMD ["node", "./dist/index.js"]
