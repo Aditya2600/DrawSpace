@@ -36,7 +36,7 @@ jobs:
 
       - name: 🐳 Build and push Docker image
         run: |
-          docker build -f docker/Dockerfile.frontend -t $IMAGE_NAME:latest 
+          docker buildx build -f docker/Dockerfile.frontend -t $IMAGE_NAME:latest . 
           docker push $IMAGE_NAME:latest
 
       
