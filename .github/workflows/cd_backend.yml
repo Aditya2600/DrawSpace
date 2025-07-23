@@ -10,7 +10,7 @@ on:
       - ".github/workflows/cd_backend.yml"
 jobs:
   build:
-    runs-on: ubunti-latest
+    runs-on: ubuntu-latest
     
     env:
       IMAGE_NAME: aditya1300/http-backend
@@ -35,6 +35,8 @@ jobs:
         with:
           context: ${{ env.CONTEXT_DIR }}
           file: ${{ env.DOCKERFILE_PATH }}
+          build-args:
+            - DATABASE_URL=${{ secrets.DATABASE_URL }}
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
