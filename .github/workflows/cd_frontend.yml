@@ -35,8 +35,13 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 🐳 Build and push Docker image
-        run: |
-          docker buildx build -f docker/Dockerfile.frontend -t $IMAGE_NAME:latest . 
-          docker push $IMAGE_NAME:latest
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.frontend
+          push: true
+          tags: |
+            aditya1300/draw-app-frontend:latest
+            aditya1300/draw-app-frontend:${{ github.sha }}
 
       
