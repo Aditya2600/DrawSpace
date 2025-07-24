@@ -127,15 +127,15 @@ export function Canvas({ roomId, socket, initialDrawings, onGameReady }: CanvasP
     }, [selectedTool, game]);
 
     useEffect(() => {
-        if (canvasRef.current) {
-            const g = new Game(canvasRef.current, roomId, socket, initialDrawings);
+        if (!canvasRef.current) return;
 
-            setGame(g);
-            onGameReady(g); // ✅ FIXED: call onGameReady after initializing Game instance
+        const g = new Game(canvasRef.current, roomId, socket, initialDrawings);
+        setGame(g);
+        onGameReady(g); // callback is memoized now
 
-            return () => g.destroy();
-        }
-    }, [canvasRef, roomId, socket, initialDrawings, onGameReady]); // ✅ Added onGameReady to dependency array
+        return () => g.destroy();
+    }, [roomId, socket, initialDrawings, onGameReady]); // ✅ clean deps
+    // ✅ Added onGameReady to dependency array
 
     useEffect(() => {
         const resize = () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { WS_URL, HTTP_BACKEND } from "@/config";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Canvas } from "./Canvas";
 import { Game } from "@/draw/Game";
 
@@ -15,6 +15,10 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [game, setGame] = useState<Game | null>(null);
     const [initialDrawings, setInitialDrawings] = useState<Drawing[]>([]);
+
+    const handleGameReady = useCallback((g: Game) => {
+        setGame(g);
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -56,13 +60,14 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
     }, [socket, roomId]);
 
     if (!socket) return <div>Connecting to server...</div>;
+    
 
     return (
         <Canvas
             roomId={roomId}
             socket={socket}
             initialDrawings={initialDrawings}
-            onGameReady={(g: Game) => setGame(g)}
+            onGameReady={handleGameReady}
         />
     );
 }
