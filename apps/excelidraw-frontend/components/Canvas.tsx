@@ -177,13 +177,13 @@ function Topbar({
                     onClick={() => setSelectedTool("pencil")}
                     activated={selectedTool === "pencil"}
                     icon={<Pencil size={20} />}
-                    tooltip="Free-hand Draw"
+                    tooltip="Line Sketch Tool"
                 />
                 <IconButton
                     onClick={() => setSelectedTool("freehand")}
                     activated={selectedTool === "freehand"}
                     icon={<PenTool size={20} />}
-                    tooltip="Free-hand Drawing"
+                    tooltip="Free-hand Draw"
                 />
                 <IconButton
                     onClick={() => setSelectedTool("rect")}

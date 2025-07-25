@@ -133,16 +133,11 @@ docker compose up --build
 
 ### 🎥 Demo 1: Sign Up → Create Room
 
-<video src="assets/demo-create-room.mp4" width="700" controls></video>
-
+[![Demo 1 Thumbnail](assets/demo-signup-thumb.png)](https://drive.google.com/file/d/1vsNnSjo3YcuHSkB2YfOMI5wQM8UKNeBq/view?usp=sharing)
 
 ### 🎥 Demo 2: Real-Time Drawing (Multi-user)
 
-<video src="assets/demo-real-time-drawing.mov" width="700" controls></video>
-
-
-
-⸻
+[![Demo 2 Thumbnail](assets/demo-draw-thumb.png)](https://drive.google.com/file/d/18T5AWGzjhUFUTFT-c7mgJj3kKMd3EJj2/view?usp=sharing)
 
 👨‍💻 Author
 
