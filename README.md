@@ -133,7 +133,7 @@ docker compose up --build
 
 ### 🎥 Demo 1: Sign Up → Create Room
 
-<video src="assets/demo-create-room.mov" width="700" controls></video>
+<video src="assets/demo-create-room.mp4" width="700" controls></video>
 
 
 ### 🎥 Demo 2: Real-Time Drawing (Multi-user)
