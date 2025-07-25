@@ -1,109 +1,162 @@
-# 🎨 DrawSpace — Real-time Collaborative Drawing App
+# 🎨 DrawSpace — Real-Time Collaborative Drawing App
 
-DrawSpace is a full-stack collaborative whiteboard application that supports real-time drawing, erasing, and chatting inside authenticated drawing rooms. Users can draw using various tools like rectangle, circle, pencil, and freehand; erase with soft delete; and have their data persist even after refreshing or rejoining the room.
+**DrawSpace** is a full-stack collaborative whiteboard built with a modern **monorepo architecture**. It supports **multi-user drawing, chatting, and erasing in real-time** — with full data persistence and authentication.
 
 ---
 
 ## ✨ Features
 
-- ✅ Real-time drawing with WebSockets
-- ✅ Tools: Rectangle, Circle, Pencil, Freehand
-- ✅ Eraser with soft-delete (persisted across sessions)
-- ✅ Chat inside drawing rooms
-- ✅ JWT-based user authentication
-- ✅ Persistent storage using PostgreSQL + Prisma ORM
-- ✅ Turbo monorepo with shared packages
-- ✅ Modular architecture with scalable components
+- 🖊️ Real-time drawing with `WebSockets`
+- 🔒 Secure user login/signup with JWT Auth
+- 🧼 Soft-delete erase mechanism (persists after refresh)
+- 💬 In-room live chat
+- 🏘️ Room-based collaboration and control
+- 🗂️ Monorepo architecture using TurboRepo
+- 📦 Shared UI + DB schema packages
+- 🐳 Docker + GitHub Actions CI/CD Ready
 
 ---
 
 ## 🧱 Tech Stack
 
-| Layer        | Tech                                        |
-|-------------|---------------------------------------------|
-| Frontend     | Next.js (App Router), Tailwind CSS          |
-| Backend (API) | Express.js (Node.js)                        |
-| Real-time    | `ws` WebSocket server                       |
-| Database     | PostgreSQL + Prisma ORM                     |
-| Auth         | JWT (JSON Web Tokens)                       |
-| Monorepo     | Turborepo + PNPM workspaces                 |
-| UI Components| `@repo/ui` shared package                   |
+| Layer         | Technology                                      |
+|---------------|--------------------------------------------------|
+| Frontend      | Next.js (App Router), Tailwind CSS               |
+| Backend (API) | Express.js (Node.js)                             |
+| Real-Time     | `ws` WebSocket server                            |
+| Database      | PostgreSQL + Prisma ORM                          |
+| Auth          | JWT (JSON Web Tokens)                            |
+| Monorepo      | Turborepo + PNPM Workspaces                      |
+| Infra / CI    | Docker, GitHub Actions, DockerHub                |
 
 ---
 
-## 📁 Monorepo Structure
-
-apps/
-excelidraw-frontend/     # Next.js frontend
-http-backend/            # Express backend (auth & REST)
-websocket-backend/       # WebSocket server (real-time draw/chat)
-
-packages/
-db/                      # Prisma schema & client
-ui/                      # Reusable UI components
-backend-common/          # Shared configs (JWT secret, URLs, etc.)
-
+## 📁 Project Structure
+```bash
+drawspace/
+├── apps/
+│   ├── excelidraw-frontend/     # Next.js frontend
+│   ├── http-backend/            # Express REST backend
+│   └── websocket-backend/       # WebSocket server
+├── packages/
+│   ├── db/                      # Prisma schema + client
+│   ├── ui/                      # Shared UI components
+│   └── backend-common/          # JWT / utils / types
+└── docker/
+├── Dockerfile.frontend
+├── Dockerfile.backend
+└── Dockerfile.ws
+```
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Local)
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Aditya2600/DrawSpace.git
-cd drawspace
+cd DrawSpace
 ```
-### 2. Install dependencies (Turbo repo)
+### 2. Install Dependencies (PNPM + Turborepo)
 ```bash
 pnpm install
 ```
-
-### 3. Set up environment variables
-
-Create a .env file in each app/package as needed:
-
-For /packages/db/.env and others:
+### 3. Environment Variables
+```bash
+/packages/db/.env
 
 DATABASE_URL=postgresql://your-user:your-pass@localhost:5432/drawspace
-JWT_SECRET=your_super_secret_jwt
+JWT_SECRET=your_super_secret_key
 
-For /apps/excelidraw-frontend/.env:
+/apps/excelidraw-frontend/.env
 
-NEXT_PUBLIC_HTTP_BACKEND=http://localhost:3001
+NEXT_PUBLIC_HTTP_BACKEND_URL=http://localhost:3001
 NEXT_PUBLIC_WS_URL=ws://localhost:8080
-
-### 4. Generate Prisma Client
+```
+### 4. Setup the Database
 ```bash
 cd packages/db
 pnpm prisma generate
 pnpm prisma migrate dev --name init
 ```
-
-### 5. Run all apps
-
-Start all dev servers using Turbo:
-
+### 5. Run All Services (Turborepo Dev)
+```bash
 pnpm dev
-
-Or run them individually:
-
-## WebSocket server
-```bash
-cd apps/websocket-backend && pnpm dev
 ```
+Or individually:
 
-## HTTP backend
+#### WebSocket Server
 ```bash
-cd apps/http-backend && pnpm dev
+cd apps/websocket-backend
+pnpm dev
 ```
-
-## Frontend
+#### REST API Backend
 ```bash
-cd apps/excelidraw-frontend && pnpm dev
+cd apps/http-backend
+pnpm dev
+```
+#### Frontend
+```bash
+cd apps/excelidraw-frontend
+pnpm dev
 ```
 
 ⸻
 
-🧾 License
+## ✅ Production .env for Frontend:
 
-MIT License © 2025 
+NEXT_PUBLIC_HTTP_BACKEND_URL=https://drawspace-api.onrender.com
+NEXT_PUBLIC_WS_URL=wss://drawspace-ws.onrender.com
+
+Ensure your backend servers have proper CORS, HTTPS, and WebSocket support enabled.
+
+⸻
+
+## 🐳 Docker Support
+
+All services support Docker builds (multi-stage):
+
+docker compose up --build
+
+
+⸻
+
+## 🔄 CI/CD
+	•	✅ GitHub Actions for image builds
+	•	✅ DockerHub integration
+	•	✅ Secrets managed via GitHub Secrets
+	•	✅ SSH deployment to VM (optional)
+
+⸻
+
+## 🧪 Demo Snapshots
+
+### 🎥 Demo 1: Sign Up → Create Room
+
+<video src="assets/demo-create-room.mov" width="700" controls></video>
+
+
+### 🎥 Demo 2: Real-Time Drawing (Multi-user)
+
+<video src="assets/demo-real-time-drawing.mov" width="700" controls></video>
+
+
+
+⸻
+
+👨‍💻 Author
+
+Aditya Meshram
+GitHub @Aditya2600 · LinkedIn
+
+⸻
+
+📜 License
+
+MIT License © 2025
+
+⸻
+
+💡 “Inspired by Excalidraw — built from scratch for hands-on learning in real-time systems, auth, and scalable architecture.”
+
+---
