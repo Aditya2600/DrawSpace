@@ -9,6 +9,10 @@ DrawSpace is a real-time collaborative drawing app with chat, rooms, and persist
 - Eraser with soft delete and undo/redo
 - Shared packages for types, UI, and backend config
 
+## Demos
+- App demo (single user): [app-demo.mp4](assets/demos/app-demo.mp4)
+- Two-user collaboration: [multi-user-demo.mp4](assets/demos/multi-user-demo.mp4)
+
 ## Tech Stack
 - Frontend: Next.js, React, Tailwind CSS
 - Backend: Express, WebSocket (ws)
