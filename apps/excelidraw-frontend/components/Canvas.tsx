@@ -1,110 +1,6 @@
-// import { useEffect, useRef, useState } from "react";
-// import { IconButton } from "./IconButton";
-// import { Circle, Pencil, RectangleHorizontal, PenTool, Eraser } from "lucide-react";
-// import { Game } from "@/draw/Game";
-// import { Drawing } from "./RoomCanvas";
-
-// type CanvasProps = {
-//     roomId: string;
-//     socket: WebSocket;
-//     initialDrawings: Drawing[];
-//     onGameReady: (g: Game) => void;
-// };
-
-
-// export type Tool = "circle" | "rect" | "pencil" | "freehand" | "eraser";
-
-// export function Canvas({ roomId, socket, initialDrawings, onGameReady }: CanvasProps) {
-//     const canvasRef = useRef<HTMLCanvasElement>(null);
-//     const [game, setGame] = useState<Game>();
-//     const [selectedTool, setSelectedTool] = useState<Tool>("freehand");
-
-//     useEffect(() => {
-//         game?.setTool(selectedTool);
-//     }, [selectedTool, game]);
-
-//     useEffect(() => {
-//         if (canvasRef.current) {
-//             const g = new Game(canvasRef.current, roomId, socket, initialDrawings);
-
-//             setGame(g);
-//             return () => {
-//                 g.destroy();
-//             }
-//         }
-//     }, [canvasRef, roomId, socket, initialDrawings]);
-
-//     useEffect(() => {
-//     const resize = () => {
-//         if (canvasRef.current) {
-//             canvasRef.current.width = window.innerWidth;
-//             canvasRef.current.height = window.innerHeight;
-//             game?.clearCanvas();
-//         }
-//     };
-//     resize(); // ✅ call once on mount
-//     window.addEventListener("resize", resize);
-//     return () => window.removeEventListener("resize", resize);
-// }, [game]);
-
-//     return (
-//         <div className="overflow-hidden h-screen bg-gray-900">
-//             <canvas 
-//                 ref={canvasRef} 
-//                 width={window.innerWidth} 
-//                 height={window.innerHeight}
-//                 className="cursor-crosshair"
-//             />
-//             <Topbar setSelectedTool={setSelectedTool} selectedTool={selectedTool}/>
-//         </div>
-//     );
-// }
-
-// function Topbar({selectedTool, setSelectedTool}: {
-//     selectedTool: Tool,
-//     setSelectedTool: (s: Tool) => void
-// }) {
-//     return (
-//         <div className="fixed top-6 left-1/2 -translate-x-1/2 flex gap-2 bg-gray-800/90 backdrop-blur-md p-3 rounded-2xl border border-gray-700/50 shadow-xl">
-//             <div className="flex gap-2">
-//                 <IconButton 
-//                     onClick={() => setSelectedTool("pencil")} 
-//                     activated={selectedTool === "pencil"} 
-//                     icon={<Pencil size={20} />}
-//                     tooltip="Free-hand Draw"
-//                 />
-//                 <IconButton 
-//                     onClick={() => setSelectedTool("freehand")} 
-//                     activated={selectedTool === "freehand"} 
-//                     icon={<PenTool size={20} />}
-//                     tooltip="Free-hand Drawing"
-//                 />
-//                 <IconButton 
-//                     onClick={() => setSelectedTool("rect")} 
-//                     activated={selectedTool === "rect"} 
-//                     icon={<RectangleHorizontal size={20} />}
-//                     tooltip="Rectangle"
-//                 />
-//                 <IconButton 
-//                     onClick={() => setSelectedTool("circle")} 
-//                     activated={selectedTool === "circle"} 
-//                     icon={<Circle size={20} />}
-//                     tooltip="Circle"
-//                 />
-//                 <IconButton 
-//                     onClick={() => setSelectedTool("eraser")} 
-//                     activated={selectedTool === "eraser"} 
-//                     icon={<Eraser size={20} />}
-//                     tooltip="Eraser"
-//                 />
-//             </div>
-//         </div>
-//     );
-// }
-
 import { useEffect, useRef, useState } from "react";
 import { IconButton } from "./IconButton";
-import { Circle, Pencil, RectangleHorizontal, PenTool, Eraser } from "lucide-react";
+import { Circle, Pencil, RectangleHorizontal, PenTool, Eraser, Undo2, Redo2 } from "lucide-react";
 import { Game } from "@/draw/Game";
 import { Drawing } from "./RoomCanvas";
 
@@ -112,7 +8,7 @@ type CanvasProps = {
     roomId: string;
     socket: WebSocket;
     initialDrawings: Drawing[];
-    onGameReady: (g: Game) => void; // ✅ used in RoomCanvas.tsx, kept intact
+    onGameReady: (g: Game) => void;
 };
 
 export type Tool = "circle" | "rect" | "pencil" | "freehand" | "eraser";
@@ -131,11 +27,10 @@ export function Canvas({ roomId, socket, initialDrawings, onGameReady }: CanvasP
 
         const g = new Game(canvasRef.current, roomId, socket, initialDrawings);
         setGame(g);
-        onGameReady(g); // callback is memoized now
+        onGameReady(g);
 
         return () => g.destroy();
-    }, [roomId, socket, initialDrawings, onGameReady]); // ✅ clean deps
-    // ✅ Added onGameReady to dependency array
+    }, [roomId, socket, initialDrawings, onGameReady]);
 
     useEffect(() => {
         const resize = () => {
@@ -145,9 +40,38 @@ export function Canvas({ roomId, socket, initialDrawings, onGameReady }: CanvasP
                 game?.clearCanvas();
             }
         };
-        resize(); // ✅ call once on mount
+        resize();
         window.addEventListener("resize", resize);
         return () => window.removeEventListener("resize", resize);
+    }, [game]);
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement | null;
+            if (target?.isContentEditable) return;
+            if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA") return;
+
+            const isModKey = event.metaKey || event.ctrlKey;
+            if (!isModKey) return;
+
+            if (event.key === "z" || event.key === "Z") {
+                event.preventDefault();
+                if (event.shiftKey) {
+                    game?.redo();
+                } else {
+                    game?.undo();
+                }
+                return;
+            }
+
+            if (event.key === "y" || event.key === "Y") {
+                event.preventDefault();
+                game?.redo();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
     }, [game]);
 
     return (
@@ -158,7 +82,12 @@ export function Canvas({ roomId, socket, initialDrawings, onGameReady }: CanvasP
                 height={window.innerHeight}
                 className="cursor-crosshair"
             />
-            <Topbar setSelectedTool={setSelectedTool} selectedTool={selectedTool} />
+            <Topbar
+                setSelectedTool={setSelectedTool}
+                selectedTool={selectedTool}
+                onUndo={() => game?.undo()}
+                onRedo={() => game?.redo()}
+            />
         </div>
     );
 }
@@ -166,9 +95,13 @@ export function Canvas({ roomId, socket, initialDrawings, onGameReady }: CanvasP
 function Topbar({
     selectedTool,
     setSelectedTool,
+    onUndo,
+    onRedo,
 }: {
     selectedTool: Tool;
     setSelectedTool: (s: Tool) => void;
+    onUndo: () => void;
+    onRedo: () => void;
 }) {
     return (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 flex gap-2 bg-gray-800/90 backdrop-blur-md p-3 rounded-2xl border border-gray-700/50 shadow-xl">
@@ -202,6 +135,17 @@ function Topbar({
                     activated={selectedTool === "eraser"}
                     icon={<Eraser size={20} />}
                     tooltip="Eraser"
+                />
+                <div className="w-px bg-gray-600/60 mx-1" />
+                <IconButton
+                    onClick={onUndo}
+                    icon={<Undo2 size={20} />}
+                    tooltip="Undo (Ctrl/Cmd+Z)"
+                />
+                <IconButton
+                    onClick={onRedo}
+                    icon={<Redo2 size={20} />}
+                    tooltip="Redo (Ctrl/Cmd+Shift+Z)"
                 />
             </div>
         </div>

@@ -2,7 +2,7 @@ import type { Tool } from "@/components/Canvas";
 import { Drawing } from "@/components/RoomCanvas";
 
 
-type Shape =
+type ShapeData =
     | {
         type: "rect";
         x: number;
@@ -28,6 +28,18 @@ type Shape =
         points: { x: number; y: number }[];
     };
 
+type Shape = ShapeData & { id: number };
+
+type HistoryAction =
+    | {
+        type: "draw";
+        shapeId: number;
+    }
+    | {
+        type: "erase";
+        shapeIds: number[];
+    };
+
 export class Game {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
@@ -39,6 +51,10 @@ export class Game {
     private socket: WebSocket;
     private selectedTool: Tool = "freehand";
     private currentFreehandPath: { x: number; y: number }[] = [];
+    private undoStack: HistoryAction[] = [];
+    private redoStack: HistoryAction[] = [];
+    private pendingDraws = new Set<string>();
+    private eraseBuffer: Set<number> | null = null;
 
     constructor(canvas: HTMLCanvasElement, roomId: string, socket: WebSocket, initialDrawings: Drawing[]) {
     this.canvas = canvas;
@@ -49,7 +65,7 @@ export class Game {
     this.selectedTool = "freehand";
 
     this.existingShapes = initialDrawings.map(d => {
-        return { id: d.id, ...d.data, type: d.type } as Shape & { id: number };
+        return { id: d.id, ...d.data, type: d.type } as Shape;
     });
 
     this.clearCanvas();
@@ -67,10 +83,101 @@ export class Game {
         this.selectedTool = tool;
     }
 
-    async init() {
-    this.clearCanvas(); // Just redraw from passed-in drawings
-}
+    undo() {
+        const action = this.undoStack.pop();
+        if (!action) return;
 
+        this.redoStack.push(action);
+
+        if (action.type === "draw") {
+            this.applyErase([action.shapeId]);
+            this.sendErase([action.shapeId]);
+            return;
+        }
+
+        this.sendRestore(action.shapeIds);
+    }
+
+    redo() {
+        const action = this.redoStack.pop();
+        if (!action) return;
+
+        this.undoStack.push(action);
+
+        if (action.type === "draw") {
+            this.sendRestore([action.shapeId]);
+            return;
+        }
+
+        this.applyErase(action.shapeIds);
+        this.sendErase(action.shapeIds);
+    }
+
+    async init() {
+        this.clearCanvas();
+    }
+
+    private recordAction(action: HistoryAction) {
+        this.undoStack.push(action);
+        this.redoStack = [];
+    }
+
+    private createClientId() {
+        if (typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID) {
+            return globalThis.crypto.randomUUID();
+        }
+
+        return `client-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    private sendDraw(shape: ShapeData) {
+        const clientId = this.createClientId();
+        this.pendingDraws.add(clientId);
+
+        this.socket.send(JSON.stringify({
+            type: "draw",
+            roomId: this.roomId,
+            clientId,
+            shapeType: shape.type,
+            shapeData: shape,
+        }));
+    }
+
+    private sendErase(shapeIds: number[]) {
+        if (shapeIds.length === 0) return;
+        this.socket.send(JSON.stringify({
+            type: "erase",
+            roomId: this.roomId,
+            erasedShapeIds: shapeIds,
+        }));
+    }
+
+    private sendRestore(shapeIds: number[]) {
+        if (shapeIds.length === 0) return;
+        this.socket.send(JSON.stringify({
+            type: "restore",
+            roomId: this.roomId,
+            restoredShapeIds: shapeIds,
+        }));
+    }
+
+    private applyErase(shapeIds: number[]) {
+        if (shapeIds.length === 0) return;
+        const idSet = new Set(shapeIds);
+        this.existingShapes = this.existingShapes.filter((shape) => !idSet.has(shape.id));
+        this.clearCanvas();
+    }
+
+    private applyRestore(shapes: Shape[]) {
+        if (shapes.length === 0) return;
+        const existingIds = new Set(this.existingShapes.map((shape) => shape.id));
+        shapes.forEach((shape) => {
+            if (!existingIds.has(shape.id)) {
+                this.existingShapes.push(shape);
+            }
+        });
+        this.clearCanvas();
+    }
 
     initHandlers() {
         this.socket.onmessage = (event) => {
@@ -78,15 +185,22 @@ export class Game {
 
             if (message.type === "draw") {
                 this.existingShapes.push(message.shape);
+
+                if (message.clientId && this.pendingDraws.has(message.clientId)) {
+                    this.pendingDraws.delete(message.clientId);
+                    this.recordAction({ type: "draw", shapeId: message.shape.id });
+                }
                 this.clearCanvas();
             }
 
             if (message.type === "erase") {
                 const erasedShapeIds: number[] = message.erasedShapeIds;
-                this.existingShapes = this.existingShapes.filter(
-                    (shape: any) => !erasedShapeIds.includes(shape.id)
-                );
-                this.clearCanvas();
+                this.applyErase(erasedShapeIds);
+            }
+
+            if (message.type === "restore") {
+                const shapes: Shape[] = message.shapes || [];
+                this.applyRestore(shapes);
             }
 
         }
@@ -134,14 +248,12 @@ export class Game {
         this.ctx.beginPath();
         this.ctx.moveTo(points[0].x, points[0].y);
 
-        // Use quadratic curves for smoother lines
         for (let i = 1; i < points.length - 1; i++) {
             const midX = (points[i].x + points[i + 1].x) / 2;
             const midY = (points[i].y + points[i + 1].y) / 2;
             this.ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
         }
 
-        // Draw the last point
         if (points.length > 1) {
             const lastPoint = points[points.length - 1];
             this.ctx.lineTo(lastPoint.x, lastPoint.y);
@@ -155,7 +267,7 @@ export class Game {
         const eraseRadius = 20;
         const erasedShapeIds: number[] = [];
 
-        this.existingShapes = this.existingShapes.filter((shape: any) => {
+        this.existingShapes = this.existingShapes.filter((shape) => {
             let shouldKeep = true;
 
             if (shape.type === "rect") {
@@ -186,24 +298,18 @@ export class Game {
                 }
             }
 
-            // ✅ Collect erased IDs before removing from local state
-            if (!shouldKeep && shape.id !== undefined) {
+            if (!shouldKeep) {
                 erasedShapeIds.push(shape.id);
             }
 
             return shouldKeep;
         });
 
-        // ✅ Send erased IDs to server if any found
         if (erasedShapeIds.length > 0) {
-            this.socket.send(JSON.stringify({
-                type: "erase",
-                roomId: this.roomId,
-                erasedShapeIds,
-            }));
+            this.sendErase(erasedShapeIds);
         }
-
         this.clearCanvas();
+        return erasedShapeIds;
     }
 
 
@@ -246,19 +352,29 @@ export class Game {
         if (this.selectedTool === "freehand") {
             this.currentFreehandPath = [{ x: this.startX, y: this.startY }];
         } else if (this.selectedTool === "eraser") {
-            this.eraseAtPoint(this.startX, this.startY);
-            this.clearCanvas();
+            this.eraseBuffer = new Set();
+            const erasedIds = this.eraseAtPoint(this.startX, this.startY);
+            erasedIds.forEach((id) => this.eraseBuffer?.add(id));
         }
     }
 
     mouseUpHandler = (e: MouseEvent) => {
         this.clicked = false;
+        const selectedTool = this.selectedTool;
+
+        if (selectedTool === "eraser") {
+            const buffer = this.eraseBuffer;
+            this.eraseBuffer = null;
+            if (buffer && buffer.size > 0) {
+                this.recordAction({ type: "erase", shapeIds: Array.from(buffer) });
+            }
+            return;
+        }
+
         const rect = this.canvas.getBoundingClientRect();
         const endX = e.clientX - rect.left;
         const endY = e.clientY - rect.top;
-
-        const selectedTool = this.selectedTool;
-        let shape: Shape | null = null;
+        let shape: ShapeData | null = null;
 
         if (selectedTool === "rect") {
             const width = endX - this.startX;
@@ -291,13 +407,11 @@ export class Game {
                 endY,
             };
         } else if (selectedTool === "freehand") {
-            // Add final point if not already there
             const lastPoint = this.currentFreehandPath[this.currentFreehandPath.length - 1];
             if (!lastPoint || lastPoint.x !== endX || lastPoint.y !== endY) {
                 this.currentFreehandPath.push({ x: endX, y: endY });
             }
 
-            // Only create shape if we have enough points for a meaningful path
             if (this.currentFreehandPath.length > 1) {
                 shape = {
                     type: "freehand",
@@ -308,12 +422,7 @@ export class Game {
         }
 
         if (shape) {
-            this.socket.send(JSON.stringify({
-                type: "draw",
-                roomId: this.roomId,
-                shapeType: shape.type,
-                shapeData: shape,
-            }));
+            this.sendDraw(shape);
             this.clearCanvas();
         }
     }
@@ -328,26 +437,26 @@ export class Game {
         const selectedTool = this.selectedTool;
 
         if (selectedTool === "freehand") {
-            // Add point to current path (with some distance threshold to avoid too many points)
             const lastPoint = this.currentFreehandPath[this.currentFreehandPath.length - 1];
             const distance = Math.sqrt(
                 Math.pow(currentX - lastPoint.x, 2) + Math.pow(currentY - lastPoint.y, 2)
             );
 
-            if (distance > 2) { // Only add point if moved enough distance
+            if (distance > 2) {
                 this.currentFreehandPath.push({ x: currentX, y: currentY });
             }
 
-            // Redraw canvas with current path
             this.clearCanvas();
             if (this.currentFreehandPath.length > 1) {
                 this.drawFreehandPath(this.currentFreehandPath, true);
             }
         } else if (selectedTool === "eraser") {
-            this.eraseAtPoint(currentX, currentY);
-            this.clearCanvas();
+            if (!this.eraseBuffer) {
+                this.eraseBuffer = new Set();
+            }
+            const erasedIds = this.eraseAtPoint(currentX, currentY);
+            erasedIds.forEach((id) => this.eraseBuffer?.add(id));
         } else {
-            // For rect, circle, and pencil tools, show preview
             const width = currentX - this.startX;
             const height = currentY - this.startY;
 

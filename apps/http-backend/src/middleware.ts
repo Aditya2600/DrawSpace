@@ -15,8 +15,7 @@ export function middleware(req: Request, res: Response, next: NextFunction) {
     }
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
-        // @ts-ignore: TODO: Fix this
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
         req.userId = decoded.userId;
         next();
     } catch (e) {

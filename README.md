@@ -1,157 +1,99 @@
-# 🎨 DrawSpace — Real-Time Collaborative Drawing App
+# DrawSpace
 
-**DrawSpace** is a full-stack collaborative whiteboard built with a modern **monorepo architecture**. It supports **multi-user drawing, chatting, and erasing in real-time** — with full data persistence and authentication.
+DrawSpace is a real-time collaborative drawing app with chat, rooms, and persistent storage. The repo is a Turborepo monorepo with a Next.js frontend, Express REST API, and a WebSocket server backed by Postgres and Prisma.
 
----
+## Features
+- Real-time multi-user drawing over WebSockets
+- Rooms and JWT-based auth
+- Persistent drawings and chat history (Postgres + Prisma)
+- Eraser with soft delete and undo/redo
+- Shared packages for types, UI, and backend config
 
-## ✨ Features
+## Tech Stack
+- Frontend: Next.js, React, Tailwind CSS
+- Backend: Express, WebSocket (ws)
+- Database: PostgreSQL, Prisma ORM
+- Tooling: Turborepo, pnpm, TypeScript
 
-- 🖊️ Real-time drawing with `WebSockets`
-- 🔒 Secure user login/signup with JWT Auth
-- 🧼 Soft-delete erase mechanism (persists after refresh)
-- 💬 In-room live chat
-- 🏘️ Room-based collaboration and control
-- 🗂️ Monorepo architecture using TurboRepo
-- 📦 Shared UI + DB schema packages
-- 🐳 Docker + GitHub Actions CI/CD Ready
-
----
-
-## 🧱 Tech Stack
-
-| Layer         | Technology                                      |
-|---------------|--------------------------------------------------|
-| Frontend      | Next.js (App Router), Tailwind CSS               |
-| Backend (API) | Express.js (Node.js)                             |
-| Real-Time     | `ws` WebSocket server                            |
-| Database      | PostgreSQL + Prisma ORM                          |
-| Auth          | JWT (JSON Web Tokens)                            |
-| Monorepo      | Turborepo + PNPM Workspaces                      |
-| Infra / CI    | Docker, GitHub Actions, DockerHub                |
-
----
-
-## 📁 Project Structure
-```bash
-drawspace/
-├── apps/
-│   ├── excelidraw-frontend/     # Next.js frontend
-│   ├── http-backend/            # Express REST backend
-│   └── websocket-backend/       # WebSocket server
-├── packages/
-│   ├── db/                      # Prisma schema + client
-│   ├── ui/                      # Shared UI components
-│   └── backend-common/          # JWT / utils / types
-└── docker/
-├── Dockerfile.frontend
-├── Dockerfile.backend
-└── Dockerfile.ws
+## Project Structure
 ```
----
-
-## 🚀 Getting Started (Local)
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Aditya2600/DrawSpace.git
-cd DrawSpace
+draw-app/
+  apps/
+    excelidraw-frontend/   # Next.js UI
+    http-backend/          # Express REST API
+    ws-backend/            # WebSocket server
+    web/                   # Optional/legacy UI
+  packages/
+    db/                    # Prisma schema + client
+    common/                # Shared types
+    backend-common/        # JWT config
+    ui/                    # Shared UI components
+    typescript-config/     # Shared TS configs
+  docker/
 ```
-### 2. Install Dependencies (PNPM + Turborepo)
+
+## Prerequisites
+- Node.js >= 18
+- pnpm >= 9
+- Postgres >= 14 (local or Docker)
+
+## Local Development
+
+### 1) Install dependencies
 ```bash
 pnpm install
 ```
-### 3. Environment Variables
+
+### 2) Configure environment
+Create `packages/db/.env`:
 ```bash
-/packages/db/.env
-
-DATABASE_URL=postgresql://your-user:your-pass@localhost:5432/drawspace
-JWT_SECRET=your_super_secret_key
-
-/apps/excelidraw-frontend/.env
-
-NEXT_PUBLIC_HTTP_BACKEND_URL=http://localhost:3001
-NEXT_PUBLIC_WS_URL=ws://localhost:8080
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+JWT_SECRET=your_secret
 ```
-### 4. Setup the Database
+`JWT_SECRET` defaults to `123123` if not set.
+
+### 3) Setup database
 ```bash
-cd packages/db
-pnpm prisma generate
-pnpm prisma migrate dev --name init
+pnpm --filter @repo/db exec prisma migrate dev --name init
 ```
-### 5. Run All Services (Turborepo Dev)
+
+### 4) Start all services
 ```bash
 pnpm dev
 ```
-Or individually:
 
-#### WebSocket Server
+### Local URLs
+- Frontend: http://localhost:3000
+- HTTP API: http://localhost:3001
+- WebSocket: ws://localhost:8080
+
+### Run services individually
 ```bash
-cd apps/websocket-backend
-pnpm dev
-```
-#### REST API Backend
-```bash
-cd apps/http-backend
-pnpm dev
-```
-#### Frontend
-```bash
-cd apps/excelidraw-frontend
-pnpm dev
+pnpm --filter http-backend dev
+pnpm --filter ws-backend dev
+pnpm --filter excelidraw-frontend dev
 ```
 
-⸻
+### Change API endpoints for the frontend
+The frontend currently uses constants in `apps/excelidraw-frontend/config.ts`. Update those values if your backend runs on a different host or port.
 
-## ✅ Production .env for Frontend:
+## Docker
 
-NEXT_PUBLIC_HTTP_BACKEND_URL=https://drawspace-api.onrender.com
-NEXT_PUBLIC_WS_URL=wss://drawspace-ws.onrender.com
-
-Ensure your backend servers have proper CORS, HTTPS, and WebSocket support enabled.
-
-⸻
-
-## 🐳 Docker Support
-
-All services support Docker builds (multi-stage):
-
+Start the full stack:
+```bash
 docker compose up --build
+```
 
+For Docker Compose, set `DATABASE_URL` to the Postgres service host:
+```bash
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
+```
 
-⸻
+## Scripts
+- `pnpm dev`: run all apps in dev mode
+- `pnpm build`: build all apps
+- `pnpm lint`: lint all apps
+- `pnpm check-types`: typecheck all apps
 
-## 🔄 CI/CD
-	•	✅ GitHub Actions for image builds
-	•	✅ DockerHub integration
-	•	✅ Secrets managed via GitHub Secrets
-	•	✅ SSH deployment to VM (optional)
-
-⸻
-
-## 🧪 Demo Snapshots
-
-### 🎥 Demo 1: Sign Up → Create Room
-
-[![Demo 1 Thumbnail](assets/demo-signup-thumb.png)](https://drive.google.com/file/d/1vsNnSjo3YcuHSkB2YfOMI5wQM8UKNeBq/view?usp=sharing)
-
-### 🎥 Demo 2: Real-Time Drawing (Multi-user)
-
-[![Demo 2 Thumbnail](assets/demo-draw-thumb.png)](https://drive.google.com/file/d/18T5AWGzjhUFUTFT-c7mgJj3kKMd3EJj2/view?usp=sharing)
-
-👨‍💻 Author
-
-Aditya Meshram
-GitHub @Aditya2600 · LinkedIn
-
-⸻
-
-📜 License
-
-MIT License © 2025
-
-⸻
-
-💡 “Inspired by Excalidraw — built from scratch for hands-on learning in real-time systems, auth, and scalable architecture.”
-
----
+## License
+MIT
