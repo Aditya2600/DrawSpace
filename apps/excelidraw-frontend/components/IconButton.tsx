@@ -17,7 +17,7 @@ export function IconButton({ icon, onClick, activated = false, tooltip }: IconBu
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
                 className={`
-                    p-3 rounded-xl transition-all duration-200 ease-out
+                    p-2 sm:p-3 rounded-xl transition-all duration-200 ease-out
                     hover:scale-105 active:scale-95
                     ${activated 
                         ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25' 

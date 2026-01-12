@@ -75,12 +75,12 @@ export function Canvas({ roomId, socket, initialDrawings, onGameReady }: CanvasP
     }, [game]);
 
     return (
-        <div className="overflow-hidden h-screen bg-gray-900">
+        <div className="relative h-[100dvh] min-h-screen overflow-hidden bg-gray-900">
             <canvas
                 ref={canvasRef}
                 width={window.innerWidth}
                 height={window.innerHeight}
-                className="cursor-crosshair"
+                className="h-full w-full cursor-crosshair touch-none"
             />
             <Topbar
                 setSelectedTool={setSelectedTool}
@@ -104,8 +104,8 @@ function Topbar({
     onRedo: () => void;
 }) {
     return (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 flex gap-2 bg-gray-800/90 backdrop-blur-md p-3 rounded-2xl border border-gray-700/50 shadow-xl">
-            <div className="flex gap-2">
+        <div className="fixed top-3 left-3 right-3 flex flex-wrap justify-center gap-1 rounded-2xl border border-gray-700/50 bg-gray-800/90 p-2 shadow-xl backdrop-blur-md sm:top-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:gap-2 sm:p-3">
+            <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
                 <IconButton
                     onClick={() => setSelectedTool("pencil")}
                     activated={selectedTool === "pencil"}
@@ -136,7 +136,7 @@ function Topbar({
                     icon={<Eraser size={20} />}
                     tooltip="Eraser"
                 />
-                <div className="w-px bg-gray-600/60 mx-1" />
+                <div className="h-px w-full bg-gray-600/60 my-1 sm:my-0 sm:h-auto sm:w-px sm:self-stretch sm:mx-1" />
                 <IconButton
                     onClick={onUndo}
                     icon={<Undo2 size={20} />}

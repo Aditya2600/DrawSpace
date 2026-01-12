@@ -182,14 +182,14 @@ export function AuthPage({ isSignin, appName = "DrawSpace" }: AuthPageProps) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <div className="text-center mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+            <div className="text-center mb-6 sm:mb-8">
               <div className="flex items-center justify-center mb-4">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl">
                   <Palette className="w-8 h-8 text-white" />
                 </div>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                 Choose Your Room
               </h1>
               <p className="text-gray-600">
@@ -275,14 +275,14 @@ export function AuthPage({ isSignin, appName = "DrawSpace" }: AuthPageProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <div className="text-center mb-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl">
                 <Palette className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               {isSignin ? "Welcome back" : "Create account"}
             </h1>
             <p className="text-gray-600">
@@ -353,7 +353,7 @@ export function AuthPage({ isSignin, appName = "DrawSpace" }: AuthPageProps) {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-5 sm:mt-6 text-center">
             <p className="text-gray-600">
               {isSignin ? "Don't have an account?" : "Already have an account?"}{" "}
               <Link
@@ -366,7 +366,7 @@ export function AuthPage({ isSignin, appName = "DrawSpace" }: AuthPageProps) {
           </div>
 
           {isSignin && (
-            <div className="mt-4 text-center">
+            <div className="mt-3 sm:mt-4 text-center">
               <button
                 type="button"
                 className="text-sm text-gray-500 hover:text-gray-700 hover:underline focus:outline-none transition-colors"
@@ -378,7 +378,7 @@ export function AuthPage({ isSignin, appName = "DrawSpace" }: AuthPageProps) {
           )}
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-6 sm:mt-8 text-center">
           <p className="text-sm text-gray-500">
             By continuing, you agree to our{" "}
             <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline transition-colors">
